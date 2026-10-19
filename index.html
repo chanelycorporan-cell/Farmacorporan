@@ -1,0 +1,1176 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Web de Farmacia - Farilmangel</title>
+    <!-- Estilos CSS -->
+    <style>
+        /* === VARIABLES DE COLOR Y PALETA PERSONALIZADA === */
+        :root {
+            --azul-marino: #1b365d;
+            --verde-brillante: #00c800;
+            --verde-hover: #00a000;
+            --fondo-claro: #f8fafc;
+            --alerta-roja: #ef4444;
+            --texto-oscuro: #1e293b;
+            --borde-gris: #cbd5e1;
+            --sombra: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* === RESET Y ESTILOS GENERALES === */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--fondo-claro);
+            color: var(--texto-oscuro);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* === ENCABEZADO Y NAVEGACIÓN === */
+        header {
+            background-color: var(--azul-marino);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--sombra);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .badge-status {
+            background-color: var(--verde-brillante);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .user-info-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            border: 1px solid white;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* BANNER NAVEGACIÓN DE PESTAÑAS */
+        nav {
+            background-color: white;
+            border-bottom: 2px solid var(--borde-gris);
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 0.5rem;
+        }
+
+        .nav-tab {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--texto-oscuro);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            background-color: #f1f5f9;
+        }
+
+        .nav-tab.active {
+            background-color: var(--azul-marino);
+            color: white;
+        }
+
+        /* CONTENEDOR PRINCIPAL */
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1300px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .section-view {
+            display: none;
+        }
+
+        .section-view.active {
+            display: block;
+        }
+
+        /* === FORMULARIOS Y CONTROLES === */
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: var(--sombra);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input, select, textarea {
+            padding: 0.6rem;
+            border: 1px solid var(--borde-gris);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid var(--azul-marino);
+        }
+
+        /* === BOTONES === */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-success {
+            background-color: var(--verde-brillante);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: var(--verde-hover);
+        }
+
+        .btn-primary {
+            background-color: var(--azul-marino);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--alerta-roja);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        /* === REJILLA DE PRODUCTOS (CARDS) === */
+        .bar-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* TARJETA DE MEDICAMENTO */
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            border: 2px solid var(--borde-gris);
+            overflow: hidden;
+            box-shadow: var(--sombra);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-3px);
+        }
+
+        /* Alerta roja cuando hay menos de 5 unidades o sin stock */
+        .product-card.stock-low {
+            border-color: var(--alerta-roja) !important;
+            background-color: #fef2f2;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: #e2e8f0;
+        }
+
+        .product-body {
+            padding: 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .product-code {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: bold;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            color: var(--azul-marino);
+        }
+
+        .product-desc {
+            font-size: 0.85rem;
+            color: #475569;
+            flex: 1;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--verde-hover);
+        }
+
+        .product-stock {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* ETIQUETA DE OFERTA */
+        .offer-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--alerta-roja);
+            color: white;
+            font-weight: bold;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            box-shadow: var(--sombra);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* === TABLAS (FACTURACIÓN Y EMPLEADOS) === */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--borde-gris);
+        }
+
+        th {
+            background-color: var(--azul-marino);
+            color: white;
+        }
+
+        /* MODAL Y PANTALLA DE LOGIN */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(27, 54, 93, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .login-card h2 {
+            color: var(--azul-marino);
+            margin-bottom: 1.5rem;
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: 2px solid var(--azul-marino);
+            background: white;
+            color: var(--azul-marino);
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .role-btn.active {
+            background-color: var(--azul-marino);
+            color: white;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+
+    <!-- SDKs de Firebase (v10.8.0 - Compatibles para Web HTML) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+    <!-- === PANTALLA DE INICIO DE SESIÓN === -->
+    <div id="loginModal" class="login-overlay">
+        <div class="login-card">
+            <h2>Farmacia Farilmangel</h2>
+            <p style="margin-bottom: 1rem; color: #64748b;">Seleccione su tipo de usuario</p>
+            
+            <div class="role-selector">
+                <button type="button" class="role-btn active" id="btnRoleCliente" onclick="seleccionarRol('cliente')">Cliente</button>
+                <button type="button" class="role-btn" id="btnRoleEmpleado" onclick="seleccionarRol('empleado')">Empleado</button>
+            </div>
+
+            <form id="loginForm" onsubmit="iniciarSesion(event)">
+                <!-- Campos para Cliente -->
+                <div id="fieldsCliente">
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="clienteNombre">Nombre Completo:</label>
+                        <input type="text" id="clienteNombre" placeholder="Ej. Juan Pérez">
+                    </div>
+                </div>
+
+                <!-- Campos para Empleado -->
+                <div id="fieldsEmpleado" class="hidden">
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="empleadoClave">Clave de Acceso:</label>
+                        <input type="password" id="empleadoClave" placeholder="Ingresa tu clave">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success" style="width: 100%; padding: 0.8rem;">Ingresar al Sistema</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- === CABECERA DEL SISTEMA === -->
+    <header>
+        <div class="header-title">
+            <h1>Farmacia Farilmangel</h1>
+            <span class="badge-status">En línea</span>
+        </div>
+        <div class="user-info-bar">
+            <span id="displayUsuarioNombre">Usuario</span>
+            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <!-- === NAVEGACIÓN PRINCIPAL === -->
+    <nav id="mainNav">
+        <button class="nav-tab active" id="tabCompras" onclick="cambiarVista('compras')">Compras (Tienda)</button>
+        <button class="nav-tab admin-only" id="tabInventario" onclick="cambiarVista('inventario')">Inventario</button>
+        <button class="nav-tab admin-only" id="tabFacturacion" onclick="cambiarVista('facturacion')">Facturación</button>
+        <button class="nav-tab admin-only" id="tabVentas" onclick="cambiarVista('ventas')">Histórico de Ventas</button>
+        <button class="nav-tab admin-only" id="tabEmpleados" onclick="cambiarVista('empleados')">Empleados</button>
+    </nav>
+
+    <!-- === CONTENIDO DE LAS SECCIONES === -->
+    <main>
+
+        <!-- 1. VISTA DE COMPRAS (TIENDA PARA CLIENTES Y EMPLEADOS) -->
+        <section id="vistaCompras" class="section-view active">
+            <div class="card">
+                <h2>Catálogo de Productos Disponibles</h2>
+                <br>
+                <div class="bar-controls">
+                    <div class="search-box">
+                        <input type="text" id="searchCompras" placeholder="Buscar medicamento o producto..." oninput="renderizarTienda()" style="width: 100%;">
+                    </div>
+                </div>
+            </div>
+            <div class="products-grid" id="gridTienda">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </section>
+
+        <!-- 2. VISTA DE INVENTARIO (ADMINISTRACIÓN) -->
+        <section id="vistaInventario" class="section-view">
+            <!-- Formulario Añadir / Editar Producto -->
+            <div class="card">
+                <h3 id="formInvTitulo">Añadir Nuevo Medicamento/Producto</h3>
+                <form id="formInventario" onsubmit="guardarProducto(event)">
+                    <input type="hidden" id="prodId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre del Producto:</label>
+                            <input type="text" id="prodNombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Precio (\$):</label>
+                            <input type="number" step="0.01" id="prodPrecio" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cantidad Disponible (Stock):</label>
+                            <input type="number" id="prodStock" required>
+                        </div>
+                        <div class="form-group">
+                            <label>URL de Foto/Imagen:</label>
+                            <input type="url" id="prodImagen" placeholder="https://ejemplo.com/imagen.jpg">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label>Descripción:</label>
+                        <textarea id="prodDesc" rows="2" required></textarea>
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; gap: 10px;">
+                        <button type="submit" class="btn btn-success">Guardar Producto</button>
+                        <button type="button" class="btn btn-danger" onclick="limpiarFormInventario()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Controles de Filtro e Inventario -->
+            <div class="card">
+                <div class="bar-controls">
+                    <div class="search-box">
+                        <input type="text" id="searchInventario" placeholder="Buscar en inventario..." oninput="renderizarInventario()">
+                    </div>
+                    <div>
+                        <label>Ordenar por: </label>
+                        <select id="sortInventario" onchange="renderizarInventario()">
+                            <option value="nombre">Orden Alfabético (A-Z)</option>
+                            <option value="cantidad">Cantidad Disponible</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="products-grid" id="gridInventario">
+                    <!-- Cards de inventario dinámicas -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. VISTA DE FACTURACIÓN (VENTA RÁPIDA) -->
+        <section id="vistaFacturacion" class="section-view">
+            <div class="card">
+                <h2>Módulo de Facturación</h2>
+                <div class="form-grid" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label>Buscar Medicamento (Código o Nombre):</label>
+                        <input type="text" id="factBuscar" placeholder="Escribe para buscar..." oninput="buscarFacturacion()">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre del Cliente:</label>
+                        <input type="text" id="factCliente" placeholder="Nombre de quien compra">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultados de búsqueda para facturar -->
+            <div class="card">
+                <h3>Seleccionar Producto para Venta</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Producto</th>
+                                <th>Stock</th>
+                                <th>Precio Unitario</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaFacturacionResultados">
+                            <!-- Filas dinámicas -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Carrito / Detalle de la Venta actual -->
+            <div class="card">
+                <h3>Detalle de la Factura Actual</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio Un.</th>
+                                <th>Subtotal</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaCarrito">
+                            <!-- Elementos agregados -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 1.5rem; text-align: right;">
+                    <h2 style="color: var(--azul-marino);">Total a Pagar: \$<span id="totalFactura">0.00</span></h2>
+                    <br>
+                    <button class="btn btn-success" style="font-size: 1.1rem;" onclick="procesarFactura()">Procesar Venta y Generar Factura</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. VISTA DE HISTÓRICO DE VENTAS -->
+        <section id="vistaVentas" class="section-view">
+            <div class="card">
+                <h2>Historial de Productos Vendidos</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Código/Prod</th>
+                                <th>Comprador (Cliente)</th>
+                                <th>Vendedor (Empleado)</th>
+                                <th>Cantidad</th>
+                                <th>Total (\$)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaHistoricoVentas">
+                            <!-- Registros de ventas -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. VISTA DE GESTIÓN DE EMPLEADOS -->
+        <section id="vistaEmpleados" class="section-view">
+            <div class="card">
+                <h3>Registrar Nuevo Empleado</h3>
+                <form id="formEmpleado" onsubmit="guardarEmpleado(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre del Empleado:</label>
+                            <input type="text" id="empNombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Clave de Acceso:</label>
+                            <input type="password" id="empClave" required placeholder="Clave secreta">
+                        </div>
+                        <div class="form-group">
+                            <label>Cargo / Rol:</label>
+                            <input type="text" id="empCargo" placeholder="Ej. Farmacéutico, Cajero" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Guardar Empleado</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Listado de Empleados Registrados</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cargo</th>
+                                <th>Clave</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaEmpleados">
+                            <!-- Filas dinámicas de empleados -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- LÓGICA DE JAVASCRIPT CONECTADA A FIREBASE -->
+    <script>
+        // === CONFIGURACIÓN DE FIREBASE CON TUS CREDENCIALES REALES ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyClbEBvAsA6ZBYu8q94JVDT9pwqYTaniV8",
+            authDomain: "farilmangel.firebaseapp.com",
+            databaseURL: "https://farilmangel-default-rtdb.firebaseio.com",
+            projectId: "farilmangel",
+            storageBucket: "farilmangel.firebasestorage.app",
+            messagingSenderId: "121849791257",
+            appId: "1:121849791257:web:81a1943b781f829adbbb88",
+            measurementId: "G-YQY5N8EP92"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // === ESTADO GLOBAL DE LA APLICACIÓN ===
+        let usuarioActual = { nombre: '', rol: '' }; // 'cliente' o 'empleado'
+        let rolSeleccionadoModal = 'cliente';
+        let productosList = [];
+        let empleadosList = [];
+        let ventasList = [];
+        let carritoActual = [];
+
+        // Inicialización al cargar la página
+        window.onload = function() {
+            escucharBaseDeDatos();
+        };
+
+        // Escuchadores en tiempo real de Firebase Realtime Database
+        function escucharBaseDeDatos() {
+            // Escuchar Productos
+            db.ref('productos').on('value', (snapshot) => {
+                const data = snapshot.val();
+                productosList = [];
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        productosList.push({ id: key, ...data[key] });
+                    });
+                } else {
+                    // Cargar productos por defecto si la BD está vacía
+                    inicializarProductosPorDefecto();
+                }
+                actualizarVistas();
+            });
+
+            // Escuchar Empleados
+            db.ref('empleados').on('value', (snapshot) => {
+                const data = snapshot.val();
+                empleadosList = [];
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        empleadosList.push({ id: key, ...data[key] });
+                    });
+                } else {
+                    inicializarEmpleadosPorDefecto();
+                }
+                renderizarEmpleados();
+            });
+
+            // Escuchar Histórico de Ventas
+            db.ref('ventas').on('value', (snapshot) => {
+                const data = snapshot.val();
+                ventasList = [];
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        ventasList.push({ id: key, ...data[key] });
+                    });
+                }
+                renderizarVentas();
+            });
+        }
+
+        // Semillas por defecto si la BD de Firebase está limpia
+        function inicializarProductosPorDefecto() {
+            const iniciales = [
+                { codigo: "100001", nombre: "Paracetamol 500mg", precio: 5.50, stock: 12, descripcion: "Alivio del dolor y la fiebre.", imagen: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300", oferta: false, porcentajeOferta: 0 },
+                { codigo: "100002", nombre: "Ibuprofeno 400mg", precio: 8.00, stock: 3, descripcion: "Antiinflamatorio y analgésico.", imagen: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300", oferta: true, porcentajeOferta: 15 },
+                { codigo: "100003", nombre: "Amoxicilina 500mg", precio: 12.50, stock: 0, descripcion: "Antibiótico de amplio espectro.", imagen: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300", oferta: false, porcentajeOferta: 0 }
+            ];
+            iniciales.forEach(p => db.ref('productos').push(p));
+        }
+
+        function inicializarEmpleadosPorDefecto() {
+            db.ref('empleados').push({ nombre: "Admin", clave: "1234", cargo: "Administrador" });
+        }
+
+        // === CONTROL DE SESIÓN Y LOGIN ===
+        function seleccionarRol(rol) {
+            rolSeleccionadoModal = rol;
+            document.getElementById('btnRoleCliente').classList.toggle('active', rol === 'cliente');
+            document.getElementById('btnRoleEmpleado').classList.toggle('active', rol === 'empleado');
+            document.getElementById('fieldsCliente').classList.toggle('hidden', rol !== 'cliente');
+            document.getElementById('fieldsEmpleado').classList.toggle('hidden', rol !== 'empleado');
+        }
+
+        function iniciarSesion(e) {
+            e.preventDefault();
+            if (rolSeleccionadoModal === 'cliente') {
+                const nombre = document.getElementById('clienteNombre').value.trim();
+                if (!nombre) return alert("Por favor ingresa tu nombre");
+                usuarioActual = { nombre: nombre, rol: 'cliente' };
+            } else {
+                const clave = document.getElementById('empleadoClave').value;
+                const emp = empleadosList.find(e => e.clave === clave);
+                if (!emp) return alert("Clave de empleado incorrecta");
+                usuarioActual = { nombre: emp.nombre, rol: 'empleado' };
+            }
+
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('displayUsuarioNombre').innerText = `${usuarioActual.nombre} (${usuarioActual.rol.toUpperCase()})`;
+
+            // Aplicar restricciones de vista según el ROL
+            const elementosAdmin = document.querySelectorAll('.admin-only');
+            if (usuarioActual.rol === 'cliente') {
+                elementosAdmin.forEach(el => el.style.display = 'none');
+                cambiarVista('compras');
+            } else {
+                elementosAdmin.forEach(el => el.style.display = 'inline-block');
+                cambiarVista('inventario');
+            }
+        }
+
+        function cerrarSesion() {
+            usuarioActual = { nombre: '', rol: '' };
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        // NAV PESTAÑAS
+        function cambiarVista(vistaId) {
+            document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+
+            const vistaMap = {
+                compras: 'vistaCompras',
+                inventario: 'vistaInventario',
+                facturacion: 'vistaFacturacion',
+                ventas: 'vistaVentas',
+                empleados: 'vistaEmpleados'
+            };
+
+            document.getElementById(vistaMap[vistaId]).classList.add('active');
+            
+            // Marcar botón activo
+            const btnTab = {
+                compras: 'tabCompras',
+                inventario: 'tabInventario',
+                facturacion: 'tabFacturacion',
+                ventas: 'tabVentas',
+                empleados: 'tabEmpleados'
+            };
+            document.getElementById(btnTab[vistaId]).classList.add('active');
+
+            actualizarVistas();
+        }
+
+        function actualizarVistas() {
+            renderizarTienda();
+            renderizarInventario();
+            buscarFacturacion();
+        }
+
+        // === AÑADIR / EDITAR EN INVENTARIO (FIREBASE) ===
+        function guardarProducto(e) {
+            e.preventDefault();
+            const id = document.getElementById('prodId').value;
+            const nombre = document.getElementById('prodNombre').value;
+            const precio = parseFloat(document.getElementById('prodPrecio').value);
+            const stock = parseInt(document.getElementById('prodStock').value);
+            const imagen = document.getElementById('prodImagen').value || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300';
+            const descripcion = document.getElementById('prodDesc').value;
+
+            if (id) {
+                // Actualizar existente
+                db.ref('productos/' + id).update({ nombre, precio, stock, imagen, descripcion });
+            } else {
+                // Crear nuevo con código de 6 dígitos auto-incremental
+                const ultimoCod = productosList.length > 0 ? Math.max(...productosList.map(p => parseInt(p.codigo || 100000))) : 100000;
+                const nuevoCodigo = (ultimoCod + 1).toString();
+
+                db.ref('productos').push({
+                    codigo: nuevoCodigo,
+                    nombre,
+                    precio,
+                    stock,
+                    imagen,
+                    descripcion,
+                    oferta: false,
+                    porcentajeOferta: 0
+                });
+            }
+
+            limpiarFormInventario();
+        }
+
+        function limpiarFormInventario() {
+            document.getElementById('prodId').value = '';
+            document.getElementById('formInventario').reset();
+            document.getElementById('formInvTitulo').innerText = 'Añadir Nuevo Medicamento/Producto';
+        }
+
+        function eliminarProducto(id) {
+            if (confirm("¿Estás seguro de eliminar este producto del sistema en la nube?")) {
+                db.ref('productos/' + id).remove();
+            }
+        }
+
+        function ponerEnOferta(id) {
+            const porcentaje = prompt("Ingrese el porcentaje de rebaja (%):", "10");
+            if (porcentaje !== null) {
+                const p = parseFloat(porcentaje);
+                if (!isNaN(p) && p > 0 && p <= 100) {
+                    db.ref('productos/' + id).update({ oferta: true, porcentajeOferta: p });
+                } else {
+                    alert("Porcentaje inválido");
+                }
+            }
+        }
+
+        function quitarOferta(id) {
+            db.ref('productos/' + id).update({ oferta: false, porcentajeOferta: 0 });
+        }
+
+        function transferirStock(id) {
+            const cant = prompt("Ingrese la cantidad a transferir/añadir al stock:", "5");
+            if (cant !== null) {
+                const add = parseInt(cant);
+                const p = productosList.find(x => x.id === id);
+                if (p && !isNaN(add)) {
+                    db.ref('productos/' + id).update({ stock: p.stock + add });
+                }
+            }
+        }
+
+        function retirarStock(id) {
+            const cant = prompt("Ingrese la cantidad a retirar del stock:", "1");
+            if (cant !== null) {
+                const ret = parseInt(cant);
+                const p = productosList.find(x => x.id === id);
+                if (p && !isNaN(ret)) {
+                    const nuevoStock = Math.max(0, p.stock - ret);
+                    db.ref('productos/' + id).update({ stock: nuevoStock });
+                }
+            }
+        }
+
+        // === RENDERIZAR INVENTARIO Y TIENDA ===
+        function renderizarInventario() {
+            const container = document.getElementById('gridInventario');
+            if (!container) return;
+            container.innerHTML = '';
+
+            let lista = [...productosList];
+            const busqueda = document.getElementById('searchInventario').value.toLowerCase();
+            const orden = document.getElementById('sortInventario').value;
+
+            // Filtrar search
+            lista = lista.filter(p => p.nombre.toLowerCase().includes(busqueda) || p.codigo.includes(busqueda));
+
+            // Ordenar
+            if (orden === 'nombre') {
+                lista.sort((a,b) => a.nombre.localeCompare(b.nombre));
+            } else {
+                lista.sort((a,b) => b.stock - a.stock);
+            }
+
+            lista.forEach(p => {
+                const precioFinal = p.oferta ? p.precio * (1 - p.porcentajeOferta/100) : p.precio;
+                const esAlertaStock = p.stock < 5;
+
+                container.innerHTML += `
+                    <div class="product-card ${esAlertaStock ? 'stock-low' : ''}">
+                        ${p.oferta ? `<div class="offer-badge">OFERTA \${p.porcentajeOferta}% OFF</div>` : ''}
+                        <img src="${p.imagen}" class="product-img" alt="${p.nombre}">
+                        <div class="product-body">
+                            <span class="product-code">CÓDIGO: ${p.codigo}</span>
+                            <h4 class="product-title">${p.nombre}</h4>
+                            <p class="product-desc">${p.descripcion}</p>
+                            <div>
+                                ${p.oferta ? `<span style="text-decoration:line-through; font-size:0.85rem; color:red;">\$\${p.precio.toFixed(2)}</span> ` : ''}
+                                <span class="product-price">$${precioFinal.toFixed(2)}</span>
+                            </div>
+                            <p class="product-stock" style="color: ${esAlertaStock ? 'var(--alerta-roja)' : 'inherit'};">
+                                Disponible: ${p.stock} unidades ${esAlertaStock ? '(¡ALERTA STOCK!)' : ''}
+                            </p>
+                            <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:10px;">
+                                <button class="btn btn-primary" style="padding:0.3rem 0.5rem; font-size:0.8rem;" onclick="transferirStock('${p.id}')">+ Stock</button>
+                                <button class="btn btn-warning" style="padding:0.3rem 0.5rem; font-size:0.8rem;" onclick="retirarStock('${p.id}')">- Stock</button>
+                                ${p.oferta ? 
+                                    `<button class="btn btn-danger" style="padding:0.3rem 0.5rem; font-size:0.8rem;" onclick="quitarOferta('\${p.id}')">Quitar Oferta</button>` : 
+                                    `<button class="btn btn-success" style="padding:0.3rem 0.5rem; font-size:0.8rem;" onclick="ponerEnOferta('\${p.id}')">Ofertar</button>`
+                                }
+                                <button class="btn btn-danger" style="padding:0.3rem 0.5rem; font-size:0.8rem;" onclick="eliminarProducto('${p.id}')">Borrar</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderizarTienda() {
+            const container = document.getElementById('gridTienda');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const busqueda = document.getElementById('searchCompras').value.toLowerCase();
+            const lista = productosList.filter(p => p.nombre.toLowerCase().includes(busqueda) || p.descripcion.toLowerCase().includes(busqueda));
+
+            lista.forEach(p => {
+                const precioFinal = p.oferta ? p.precio * (1 - p.porcentajeOferta/100) : p.precio;
+                const esAlertaStock = p.stock < 5;
+
+                container.innerHTML += `
+                    <div class="product-card ${esAlertaStock ? 'stock-low' : ''}">
+                        ${p.oferta ? `<div class="offer-badge">OFERTA ESPECIAL</div>` : ''}
+                        <img src="${p.imagen}" class="product-img" alt="${p.nombre}">
+                        <div class="product-body">
+                            <span class="product-code">CÓDIGO: ${p.codigo}</span>
+                            <h4 class="product-title">${p.nombre}</h4>
+                            <p class="product-desc">${p.descripcion}</p>
+                            <div>
+                                ${p.oferta ? `<span style="text-decoration:line-through; font-size:0.85rem; color:red;">\$\${p.precio.toFixed(2)}</span> ` : ''}
+                                <span class="product-price">$${precioFinal.toFixed(2)}</span>
+                            </div>
+                            <p class="product-stock" style="color: ${p.stock === 0 ? 'red' : 'inherit'};">
+                                ${p.stock > 0 ? `Disponible: \${p.stock} un.` : 'AGOTADO'}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // === FACTURACIÓN Y CARRITO ===
+        function buscarFacturacion() {
+            const tbody = document.getElementById('tablaFacturacionResultados');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const term = document.getElementById('factBuscar').value.toLowerCase();
+            if (!term) return;
+
+            const coincidencia = productosList.filter(p => p.nombre.toLowerCase().includes(term) || p.codigo.includes(term));
+
+            coincidencia.forEach(p => {
+                const precioFinal = p.oferta ? p.precio * (1 - p.porcentajeOferta/100) : p.precio;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${p.codigo}</td>
+                        <td>${p.nombre} ${p.oferta ? '<span style="color:red; font-weight:bold;">(En Oferta)</span>' : ''}</td>
+                        <td>${p.stock}</td>
+                        <td>$${precioFinal.toFixed(2)}</td>
+                        <td>${p.stock > 0 ? '<span style="color:green;">Disponible</span>' : '<span style="color:red;">Agotado</span>'}</td>
+                        <td>
+                            ${p.stock > 0 ? `<button class="btn btn-success" onclick="agregarAlCarrito('\${p.id}')">Agregar</button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function agregarAlCarrito(prodId) {
+            const prod = productosList.find(p => p.id === prodId);
+            if (!prod) return;
+
+            const precioFinal = prod.oferta ? prod.precio * (1 - prod.porcentajeOferta/100) : prod.precio;
+            const existe = carritoActual.find(item => item.id === prodId);
+
+            if (existe) {
+                if (existe.cantidad + 1 > prod.stock) return alert("No hay suficiente stock disponible");
+                existe.cantidad++;
+                existe.subtotal = existe.cantidad * precioFinal;
+            } else {
+                carritoActual.push({
+                    id: prod.id,
+                    codigo: prod.codigo,
+                    nombre: prod.nombre,
+                    precio: precioFinal,
+                    cantidad: 1,
+                    subtotal: precioFinal
+                });
+            }
+
+            renderizarCarrito();
+        }
+
+        function renderizarCarrito() {
+            const tbody = document.getElementById('tablaCarrito');
+            tbody.innerHTML = '';
+            let total = 0;
+
+            carritoActual.forEach((item, index) => {
+                total += item.subtotal;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.nombre}</td>
+                        <td>${item.cantidad}</td>
+                        <td>$${item.precio.toFixed(2)}</td>
+                        <td>$${item.subtotal.toFixed(2)}</td>
+                        <td><button class="btn btn-danger" onclick="removerDelCarrito(${index})">X</button></td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('totalFactura').innerText = total.toFixed(2);
+        }
+
+        function removerDelCarrito(index) {
+            carritoActual.splice(index, 1);
+            renderizarCarrito();
+        }
+
+        function procesarFactura() {
+            if (carritoActual.length === 0) return alert("El carrito está vacío");
+            const cliente = document.getElementById('factCliente').value || "Cliente Mostrador";
+
+            const ahora = new Date();
+            const fechaHora = ahora.toLocaleString();
+
+            // 1. Descontar stock e insertar venta en Firebase
+            carritoActual.forEach(item => {
+                const prod = productosList.find(p => p.id === item.id);
+                if (prod) {
+                    const nuevoStock = Math.max(0, prod.stock - item.cantidad);
+                    db.ref('productos/' + item.id).update({ stock: nuevoStock });
+
+                    // Guardar registro de venta
+                    db.ref('ventas').push({
+                        fechaHora: fechaHora,
+                        codigoProducto: item.codigo,
+                        nombreProducto: item.nombre,
+                        comprador: cliente,
+                        vendedor: usuarioActual.nombre,
+                        cantidad: item.cantidad,
+                        total: item.subtotal
+                    });
+                }
+            });
+
+            alert("¡Venta procesada con éxito y sincronizada en la nube!");
+            carritoActual = [];
+            document.getElementById('factCliente').value = '';
+            document.getElementById('factBuscar').value = '';
+            renderizarCarrito();
+            buscarFacturacion();
+        }
+
+        // === RENDERIZAR HISTÓRICO DE VENTAS ===
+        function renderizarVentas() {
+            const tbody = document.getElementById('tablaHistoricoVentas');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            ventasList.slice().reverse().forEach(v => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${v.fechaHora}</td>
+                        <td>${v.nombreProducto} (${v.codigoProducto})</td>
+                        <td>${v.comprador}</td>
+                        <td>${v.vendedor}</td>
+                        <td>${v.cantidad}</td>
+                        <td><strong>$${v.total.toFixed(2)}</strong></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // === GESTIÓN DE EMPLEADOS ===
+        function guardarEmpleado(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('empNombre').value;
+            const clave = document.getElementById('empClave').value;
+            const cargo = document.getElementById('empCargo').value;
+
+            db.ref('empleados').push({ nombre, clave, cargo });
+            document.getElementById('formEmpleado').reset();
+            alert("Empleado agregado correctamente");
+        }
+
+        function renderizarEmpleados() {
+            const tbody = document.getElementById('tablaEmpleados');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            empleadosList.forEach(e => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${e.nombre}</td>
+                        <td>${e.cargo}</td>
+                        <td>****</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="eliminarEmpleado('${e.id}')">Borrar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function eliminarEmpleado(id) {
+            if (confirm("¿Deseas borrar a este empleado?")) {
+                db.ref('empleados/' + id).remove();
+            }
+        }
+    </script>
+</body>
+</html>
