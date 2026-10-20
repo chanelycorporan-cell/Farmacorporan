@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmacorporan — Tienda y Facturación (revisión 2)</title>
+    <!-- Estilos CSS -->
+    <style>
+        /* === VARIABLES DE COLOR Y PALETA PERSONALIZADA === */
+        :root {
+            --azul-marino: #1b365d;
+            --verde-brillante: #00c800;
+            --verde-hover: #00a000;
+            --fondo-claro: #f8fafc;
+            --alerta-roja: #ef4444;
+            --texto-oscuro: #1e293b;
+            --borde-gris: #cbd5e1;
+            --sombra: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* === RESET Y ESTILOS GENERALES === */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--fondo-claro);
+            color: var(--texto-oscuro);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* === ENCABEZADO Y NAVEGACIÓN === */
+        header {
+            background-color: var(--azul-marino);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--sombra);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .badge-status {
+            background-color: var(--verde-brillante);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .user-info-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            border: 1px solid white;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* BANNER NAVEGACIÓN DE PESTAÑAS */
+        nav {
+            background-color: white;
+            border-bottom: 2px solid var(--borde-gris);
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 0.5rem;
+        }
+
+        .nav-tab {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--texto-oscuro);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            background-color: #f1f5f9;
+        }
+
+        .nav-tab.active {
+            background-color: var(--azul-marino);
+            color: white;
+        }
+
+        /* CONTENEDOR PRINCIPAL */
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1300px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .section-view {
+            display: none;
+        }
+
+        .section-view.active {
+            display: block;
+        }
+
+        /* === FORMULARIOS Y CONTROLES === */
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: var(--sombra);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input, select, textarea {
+            padding: 0.6rem;
+            border: 1px solid var(--borde-gris);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid var(--azul-marino);
+        }
+
+        /* === BOTONES === */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-success {
+            background-color: var(--verde-brillante);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: var(--verde-hover);
+        }
+
+        .btn-primary {
+            background-color: var(--azul-marino);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--alerta-roja);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        /* === REJILLA DE PRODUCTOS (CARDS) === */
+        .bar-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* TARJETA DE MEDICAMENTO */
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            border: 2px solid var(--borde-gris);
+            overflow: hidden;
+            box-shadow: var(--sombra);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .product-card.stock-low {
+            border-color: var(--alerta-roja) !important;
+            background-color: #fef2f2;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: #e2e8f0;
+        }
+
+        .product-body {
+            padding: 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .product-code {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: bold;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            color: var(--azul-marino);
+        }
+
+        .product-desc {
+            font-size: 0.85rem;
+            color: #475569;
+            flex: 1;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--verde-hover);
+        }
+
+        .product-stock {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .offer-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--alerta-roja);
+            color: white;
+            font-weight: bold;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            box-shadow: var(--sombra);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* === TABLAS === */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--borde-gris);
+        }
+
+        th {
+            background-color: var(--azul-marino);
+            color: white;
+        }
+
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(27, 54, 93, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .login-card h2 {
+            color: var(--azul-marino);
+            margin-bottom: 1.5rem;
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: 2px solid var(--azul-marino);
+            background: white;
+            color: var(--azul-marino);
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .role-btn.active {
+            background-color: var(--azul-marino);
+            color: white;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .estado-sistema { max-width:1300px; width:calc(100% - 2rem); margin:1rem auto 0;
+            background:#fff7ed; border:1px solid #fdba74; border-radius:10px; padding:1rem; }
+        .estado-sistema p { margin:.35rem 0; line-height:1.5; }
+        .estado-sistema .botones-estado { display:flex; gap:.7rem; flex-wrap:wrap; margin-top:.6rem; }
+        .invoice-modal {position:fixed; inset:0; background:rgba(0,0,0,.7);
+            z-index:3000; display:flex; align-items:flex-start; justify-content:center; overflow:auto; padding:2rem 1rem;}
+        .invoice-wrap {width:min(760px,100%); background:white; border-radius:8px; padding:1rem;}
+        .invoice-actions {display:flex; justify-content:flex-end; gap:.75rem; margin-bottom:1rem; flex-wrap:wrap;}
+        .invoice-sheet {border:1px solid #cbd5e1; padding:2rem; background:white; color:#111;}
+        .invoice-head {display:flex; justify-content:space-between; gap:1rem; margin-bottom:1.5rem;}
+        .invoice-sheet h2 {color:#1b365d; margin-bottom:.3rem;}
+        .invoice-sheet p {line-height:1.6;}
+        .invoice-sheet table {margin:1rem 0;}
+        .invoice-sheet th {background:#1b365d;color:white;}
+        .invoice-total {text-align:right; font-size:1.5rem; font-weight:700; margin-top:1.2rem;}
+        .invoice-nota {margin-top:1.5rem; border-top:1px solid #aaa; padding-top:1rem; font-size:.85rem;}
+        @media print {
+            body > :not(#facturaModal) {display:none !important;}
+            #facturaModal, #facturaModal.hidden {position:static !important; display:block !important; padding:0 !important;
+                background:white !important; overflow:visible !important;}
+            #facturaModal .invoice-wrap {width:100%; padding:0; border-radius:0;}
+            #facturaModal .invoice-actions {display:none !important;}
+            #facturaModal .invoice-sheet {border:0; padding:0;}
+            @page {size:A4; margin:16mm;}
+        }
+    </style>
+
+    <!-- SDKs externos: si fallan, el JS ofrecerá modo local de pruebas -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+    <!-- === PANTALLA DE INICIO DE SESIÓN === -->
+    <div id="loginModal" class="login-overlay">
+        <div class="login-card">
+            <h2>Farmacorporan</h2>
+            <p style="margin-bottom: 1rem; color: #64748b;">Seleccione su tipo de usuario</p>
+            
+            <div class="role-selector">
+                <button type="button" class="role-btn active" id="btnRoleCliente" onclick="seleccionarRol('cliente')">Cliente</button>
+                <button type="button" class="role-btn" id="btnRoleEmpleado" onclick="seleccionarRol('empleado')">Empleado</button>
+            </div>
+
+            <form id="loginForm" onsubmit="iniciarSesion(event)">
+                <div id="fieldsCliente">
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="clienteNombre">Nombre Completo:</label>
+                        <input type="text" id="clienteNombre" placeholder="Ej. Juan Pérez">
+                    </div>
+                </div>
+
+                <div id="fieldsEmpleado" class="hidden">
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="empleadoClave">Clave de Acceso:</label>
+                        <input type="password" id="empleadoClave" placeholder="Ingresa tu clave">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success" style="width: 100%; padding: 0.8rem;">Ingresar al Sistema</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- === CABECERA DEL SISTEMA === -->
+    <header>
+        <div class="header-title">
+            <h1>Farmacorporan</h1>
+            <span class="badge-status">Conectando…</span>
+        </div>
+        <div class="user-info-bar">
+            <span id="displayUsuarioNombre">Usuario</span>
+            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <aside id="appStatus" class="estado-sistema" role="status" aria-live="polite">
+        <strong id="tituloEstado">Verificando conexión...</strong>
+        <p id="detalleEstado">Comprobando Firebase Realtime Database.</p>
+        <div class="botones-estado">
+            <button type="button" id="btnModoLocal" class="btn btn-warning" onclick="activarModoLocal()">Usar modo local de prueba</button>
+            <button type="button" id="btnVolverNube" class="btn btn-primary hidden" onclick="volverAFirebase()">Conectar a Firebase</button>
+        </div>
+    </aside>
+
+    <!-- === NAVEGACIÓN PRINCIPAL === -->
+    <nav id="mainNav">
+        <button class="nav-tab active" id="tabCompras" onclick="cambiarVista('compras')">Compras (Tienda)</button>
+        <button class="nav-tab admin-only" id="tabInventario" onclick="cambiarVista('inventario')">Inventario</button>
+        <button class="nav-tab admin-only" id="tabFacturacion" onclick="cambiarVista('facturacion')">Facturación</button>
+        <button class="nav-tab admin-only" id="tabVentas" onclick="cambiarVista('ventas')">Histórico de Ventas</button>
+        <button class="nav-tab admin-only" id="tabEmpleados" onclick="cambiarVista('empleados')">Empleados</button>
+    </nav>
+
+    <!-- === CONTENIDO DE LAS SECCIONES === -->
+    <main>
+
+        <!-- 1. VISTA DE COMPRAS (TIENDA CLIENTES / EMPLEADOS) -->
+        <section id="vistaCompras" class="section-view active">
+            <div class="card">
+                <h2>Catálogo de Productos Disponibles</h2>
+                <br>
+                <div class="bar-controls">
+                    <div class="search-box">
+                        <input type="text" id="searchCompras" placeholder="Buscar medicamento o producto..." oninput="renderizarTienda()" style="width: 100%;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="products-grid" id="gridTienda">
+                <!-- Se llena dinámicamente -->
+            </div>
+
+            <!-- CARRITO DEL CLIENTE -->
+            <div class="card" style="margin-top: 2rem;">
+                <h3>Mi Carrito de Compras</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio Un.</th>
+                                <th>Subtotal</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaCarritoCliente">
+                            <!-- Items del cliente -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 1.5rem; text-align: right;">
+                    <h2 style="color: var(--azul-marino);">Total: $<span id="totalCarritoCliente">0.00</span></h2>
+                    <br>
+                    <button class="btn btn-success" style="font-size: 1.1rem;" id="btnPagarCarritoCliente" onclick="pagarCarritoCliente()">Confirmar Pedido</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. VISTA DE INVENTARIO -->
+        <section id="vistaInventario" class="section-view">
+            <div class="card">
+                <h3 id="formInvTitulo">Añadir Nuevo Medicamento/Producto</h3>
+                <form id="formInventario" onsubmit="guardarProducto(event)">
+                    <input type="hidden" id="prodId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre del Producto:</label>
+                            <input type="text" id="prodNombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Precio ($):</label>
+                            <input type="number" step="0.01" id="prodPrecio" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cantidad Disponible (Stock):</label>
+                            <input type="number" id="prodStock" min="0" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>URL de Foto/Imagen:</label>
+                            <input type="url" id="prodImagen" placeholder="https://ejemplo.com/imagen.jpg">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label>Descripción:</label>
+                        <textarea id="prodDesc" rows="2" required></textarea>
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; gap: 10px;">
+                        <button type="submit" class="btn btn-success">Guardar Producto</button>
+                        <button type="button" class="btn btn-danger" onclick="limpiarFormInventario()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="bar-controls">
+                    <div class="search-box">
+                        <input type="text" id="searchInventario" placeholder="Buscar en inventario..." oninput="renderizarInventario()">
+                    </div>
+                    <div>
+                        <label>Ordenar por: </label>
+                        <select id="sortInventario" onchange="renderizarInventario()">
+                            <option value="nombre">Orden Alfabético (A-Z)</option>
+                            <option value="cantidad">Cantidad Disponible</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="products-grid" id="gridInventario">
+                    <!-- Cards de inventario dinámicas -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. VISTA DE FACTURACIÓN -->
+        <section id="vistaFacturacion" class="section-view">
+            <div class="card">
+                <h2>Módulo de Facturación</h2>
+                <div class="form-grid" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label>Buscar Medicamento (Código o Nombre):</label>
+                        <input type="text" id="factBuscar" placeholder="Escribe para buscar..." oninput="buscarFacturacion()">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre del Cliente:</label>
+                        <input type="text" id="factCliente" placeholder="Nombre de quien compra">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Seleccionar Producto para Venta</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Producto</th>
+                                <th>Stock</th>
+                                <th>Precio Unitario</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaFacturacionResultados">
+                            <!-- Filas dinámicas -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Detalle de la Factura Actual</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio Un.</th>
+                                <th>Subtotal</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaCarrito">
+                            <!-- Elementos agregados -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 1.5rem; text-align: right;">
+                    <h2 style="color: var(--azul-marino);">Total a Pagar: $<span id="totalFactura">0.00</span></h2>
+                    <br>
+                    <button class="btn btn-success" style="font-size: 1.1rem;" id="btnProcesarFactura" onclick="procesarFactura()">Procesar Venta y Generar Factura</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. VISTA DE HISTÓRICO DE VENTAS -->
+        <section id="vistaVentas" class="section-view">
+            <div class="card">
+                <h2>Historial de Productos Vendidos</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Código/Factura</th>
+                                <th>Producto</th>
+                                <th>Comprador</th>
+                                <th>Vendedor</th>
+                                <th>Cant.</th>
+                                <th>Total ($)</th>
+                                <th>Comprobante</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaHistoricoVentas">
+                            <!-- Registros de ventas -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. VISTA DE EMPLEADOS -->
+        <section id="vistaEmpleados" class="section-view">
+            <div class="card">
+                <h3>Registrar Nuevo Empleado</h3>
+                <form id="formEmpleado" onsubmit="guardarEmpleado(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre del Empleado:</label>
+                            <input type="text" id="empNombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Clave de Acceso:</label>
+                            <input type="password" id="empClave" required placeholder="Clave secreta">
+                        </div>
+                        <div class="form-group">
+                            <label>Cargo / Rol:</label>
+                            <input type="text" id="empCargo" placeholder="Ej. Farmacéutico, Cajero" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Guardar Empleado</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Listado de Empleados Registrados</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cargo</th>
+                                <th>Clave</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaEmpleados">
+                            <!-- Filas dinámicas -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Vista de factura para imprimir o guardar como PDF desde el navegador -->
+    <div id="facturaModal" class="invoice-modal hidden" role="dialog" aria-modal="true" aria-label="Factura de venta">
+        <div class="invoice-wrap">
+            <div class="invoice-actions">
+                <button class="btn btn-primary" type="button" onclick="imprimirFactura()">Imprimir / Guardar PDF</button>
+                <button class="btn btn-danger" type="button" onclick="cerrarFactura()">Cerrar</button>
+            </div>
+            <div id="contenidoFactura" class="invoice-sheet"></div>
+        </div>
+    </div>
+
+    <!-- LÓGICA JAVASCRIPT CON FIREBASE REALTIME DATABASE -->
+    <script>
+        "use strict";
+
+        // NOTA DE SEGURIDAD: Esta versión conserva el esquema de empleados original para
+        // compatibilidad. Para producción: Firebase Authentication + reglas de seguridad
+        // + operaciones de venta en un backend confiable (Cloud Functions).
+        const firebaseConfig = {
+            apiKey: "AIzaSyClbEBvAsA6ZBYu8q94JVDT9pwqYTaniV8",
+            authDomain: "farilmangel.firebaseapp.com",
+            databaseURL: "https://farilmangel-default-rtdb.firebaseio.com",
+            projectId: "farilmangel",
+            storageBucket: "farilmangel.firebasestorage.app",
+            messagingSenderId: "121849791257",
+            appId: "1:121849791257:web:81a1943b781f829adbbb88",
+            measurementId: "G-YQY5N8EP92"
+        };
+
+        let db = null;
+        let modoDatos = 'inicializando';
+        let suscripciones = [];
+        let ultimoComprobante = null;
+        let conexionFirebase = false;
+        let errorFirebaseDetectado = '';
+        const IMAGEN_DEFAULT = "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300";
+        const $ = id => document.getElementById(id);
+        let usuarioActual = { nombre: '', rol: '' };
+        let rolSeleccionadoModal = 'cliente';
+        let productosList = [];
+        let empleadosList = [];
+        let ventasList = [];
+        // Los carritos SOLO contienen IDs y cantidades. Los precios y totales se
+        // calculan nuevamente desde el catálogo en centavos, nunca como cadenas.
+        let carritoActual = [];
+        let carritoClienteList = [];
+        let ventaEnProceso = false;
+
+        function escaparHTML(valor) {
+            return String(valor ?? '').replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        function numeroPrecio(valor) {
+            if (valor === null || valor === undefined || valor === '') return NaN;
+            if (typeof valor === 'number') return Number.isFinite(valor) ? valor : NaN;
+            let cadena = String(valor).trim().replace(/[^\d,.\-]/g, '');
+            if (cadena.includes('.') && cadena.includes(',')) {
+                cadena = cadena.lastIndexOf(',') > cadena.lastIndexOf('.')
+                    ? cadena.replace(/\./g, '').replace(',', '.')
+                    : cadena.replace(/,/g, '');
+            } else if (cadena.includes(',')) {
+                cadena = cadena.replace(',', '.');
+            }
+            if (!cadena || cadena === '-') return NaN;
+            return Number(cadena);
+        }
+
+        function aCentavos(valor) {
+            const numero = numeroPrecio(valor);
+            if (!Number.isFinite(numero) || numero < 0 || numero > 1000000000) return null;
+            return Math.round((numero + Number.EPSILON) * 100);
+        }
+
+        function formatoMoneda(centavos) {
+            return (centavos / 100).toLocaleString('es-DO', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+        }
+
+        function enteroNoNegativo(valor) {
+            const n = Number(valor);
+            return Number.isSafeInteger(n) && n >= 0 ? n : 0;
+        }
+
+        function normalizarProducto(raw, id) {
+            const p = raw && typeof raw === 'object' ? raw : {};
+            const porcentaje = Number(p.porcentajeOferta);
+            return {
+                ...p,
+                id: String(id),
+                codigo: String(p.codigo ?? id),
+                nombre: String(p.nombre ?? 'Sin nombre'),
+                descripcion: String(p.descripcion ?? ''),
+                stock: enteroNoNegativo(p.stock),
+                precio: numeroPrecio(p.precio),
+                imagen: procesarUrlImagen(p.imagen),
+                oferta: p.oferta === true,
+                porcentajeOferta: Number.isFinite(porcentaje) && porcentaje >= 0 && porcentaje <= 100 ? porcentaje : 0
+            };
+        }
+
+        function precioProductoCentavos(p) {
+            const base = aCentavos(p.precio);
+            if (base === null) return null;
+            return p.oferta ? Math.round(base * (100 - p.porcentajeOferta) / 100) : base;
+        }
+
+        function procesarUrlImagen(url) {
+            if (!url) return IMAGEN_DEFAULT;
+            let candidato = String(url).trim();
+            if (candidato.includes('google.com/url?')) {
+                try {
+                    const temporal = new URL(candidato);
+                    candidato = temporal.searchParams.get('url') || candidato;
+                } catch (_) { return IMAGEN_DEFAULT; }
+            }
+            try {
+                const u = new URL(candidato);
+                return ['https:', 'http:'].includes(u.protocol) ? u.href : IMAGEN_DEFAULT;
+            } catch (_) { return IMAGEN_DEFAULT; }
+        }
+
+        function mostrarError(contexto, error) {
+            console.error(contexto, error);
+            alert(contexto + (error && error.message ? ': ' + error.message : '.'));
+        }
+
+        function soloEmpleado() {
+            if (usuarioActual.rol === 'empleado') return true;
+            alert('Esta operación es exclusiva de empleados.');
+            return false;
+        }
+
+        // Fuente de datos local PARA PRUEBAS, no para pedidos reales ni multiusuario.
+        // Permite probar todos los módulos aun si el SDK de Firebase no está disponible
+        // o las reglas de seguridad de la base real rechazan las operaciones.
+        function baseLocal() {
+            const CLAVE = 'farmacorporan_demo_local_v4';
+            let contador = 0;
+            const crearBase = () => ({
+                productos: {
+                    demo_01: { codigo:'DEMO-001', nombre:'Paracetamol 500 mg (DEMO)',
+                        precio:25.50, stock:14, descripcion:'Producto ficticio para verificar compras.', oferta:false, porcentajeOferta:0 },
+                    demo_02: { codigo:'DEMO-002', nombre:'Vitamina C (DEMO)',
+                        precio:48.00, stock:9, descripcion:'Producto ficticio con 10% de descuento.', oferta:true, porcentajeOferta:10 },
+                    demo_03: { codigo:'DEMO-003', nombre:'Alcohol 70% (DEMO)',
+                        precio:85.00, stock:5, descripcion:'Producto ficticio para verificar inventario.', oferta:false, porcentajeOferta:0 }
+                },
+                empleados: { admin_demo: {nombre:'Admin DEMO', clave:'demo1234', cargo:'Administrador de pruebas'} },
+                ventas: {}
+            });
+            let datos;
+            try { datos = JSON.parse(localStorage.getItem(CLAVE)); } catch (_) { datos=null; }
+            if (!datos || typeof datos !== 'object' || !datos.productos || !datos.empleados || !datos.ventas) datos = crearBase();
+            const escuchas = new Map();
+            const acceso = path => String(path || '').split('/').filter(Boolean);
+            const leer = path => acceso(path).reduce((acc,k) => acc && acc[k], datos) ?? null;
+            const escribir = (path, valor) => {
+                const trozos = acceso(path);
+                if (!trozos.length) { datos = valor; return; }
+                let nodo = datos;
+                trozos.slice(0,-1).forEach(k => {
+                    if (!nodo[k] || typeof nodo[k] !== 'object') nodo[k] = {};
+                    nodo = nodo[k];
+                });
+                if (valor === null) delete nodo[trozos.at(-1)];
+                else nodo[trozos.at(-1)] = valor;
+            };
+            const guardar = () => {
+                try { localStorage.setItem(CLAVE,JSON.stringify(datos)); }
+                catch (e) { errorDeDatos('No se pudo guardar en el almacenamiento local: ' + e.message); }
+                for (const [path,fnSet] of escuchas) for (const fn of fnSet) fn({val:()=>structuredClone(leer(path))});
+            };
+            // La actualización entre pestañas no representa un mecanismo seguro de concurrencia.
+            const almacenamiento = e => {
+                if (e.key !== CLAVE || !e.newValue) return;
+                try { datos=JSON.parse(e.newValue); for (const [path,fnSet] of escuchas)
+                    for (const fn of fnSet) fn({val:()=>structuredClone(leer(path))}); } catch(_) {}
+            };
+            window.addEventListener('storage', almacenamiento);
+            const referencia = path => ({
+                key: acceso(path).at(-1) || null,
+                on(tipo,fn) {
+                    if (!escuchas.has(path)) escuchas.set(path,new Set());
+                    escuchas.get(path).add(fn);
+                    fn({val:()=>structuredClone(path === '.info/connected' ? true : leer(path))});
+                    return fn;
+                },
+                off(tipo,fn) { escuchas.get(path)?.delete(fn); },
+                push(valor) {
+                    const llave='LOC-' + Date.now().toString(36) + '-' + (++contador).toString(36)
+                        + '-' + Math.random().toString(36).slice(2,7);
+                    const ref=referencia((path ? path+'/' : '')+llave);
+                    if (valor !== undefined) return ref.set(valor).then(()=>ref);
+                    return ref;
+                },
+                async set(valor) { escribir(path,structuredClone(valor)); guardar(); },
+                async update(cambios) {
+                    Object.entries(cambios).forEach(([k,v])=> escribir(path ? path+'/'+k : k,structuredClone(v)));
+                    guardar();
+                },
+                async remove() { escribir(path,null); guardar(); },
+                async transaction(fn) {
+                    const antes=structuredClone(leer(path));
+                    const despues=fn(antes);
+                    if (despues === undefined) return {committed:false,snapshot:{val:()=>antes}};
+                    escribir(path,structuredClone(despues)); guardar();
+                    return {committed:true,snapshot:{val:()=>structuredClone(despues)}};
+                }
+            });
+            const instancia={ref: referencia, apagar() { window.removeEventListener('storage',almacenamiento); }};
+            return instancia;
+        }
+
+        function estadoDeDatos(titulo, descripcion, esError=false) {
+            $('tituloEstado').textContent=titulo;
+            $('detalleEstado').textContent=descripcion;
+            $('appStatus').style.background=esError ? '#fef2f2' : (modoDatos==='local'?'#fffbeb':'#f0fdf4');
+            $('appStatus').style.borderColor=esError ? '#fca5a5' : (modoDatos==='local'?'#fbbf24':'#86efac');
+            $('btnModoLocal').classList.toggle('hidden', modoDatos==='local');
+            $('btnVolverNube').classList.toggle('hidden', modoDatos!=='local' || !window.firebase?.database);
+            const badge=document.querySelector('.badge-status');
+            badge.textContent=modoDatos==='local' ? 'PRUEBA LOCAL' : (conexionFirebase ? 'En línea' : 'Sin conexión');
+            badge.style.background=modoDatos==='local' ? '#b45309' : (conexionFirebase ? 'var(--verde-brillante)' : 'var(--alerta-roja)');
+        }
+        function errorDeDatos(mensaje) {
+            if (modoDatos==='firebase') errorFirebaseDetectado=mensaje;
+            console.error('Error de conexión/permisos:',mensaje);
+            estadoDeDatos('Error de base de datos',mensaje + ' La aplicación no puede arreglar las reglas de Firebase desde el navegador. Puedes probar el modo local sin afectar los datos reales.',true);
+        }
+        function desactivarEscuchas() {
+            for (const { instancia,path,fn } of suscripciones) {
+                try { instancia.ref(path).off('value',fn); } catch (_) {}
+            }
+            suscripciones=[];
+            if (db?.apagar) db.apagar();
+        }
+        function suscribir(path,fn) {
+            const actual=db;
+            const manejador=actual.ref(path).on('value',fn,err => {
+                if (db!==actual) return;
+                errorDeDatos('Firebase rechazó leer «'+path+'»: '+(err?.message || String(err)));
+            });
+            suscripciones.push({instancia:actual,path,fn:manejador});
+        }
+        function escucharBaseDeDatos() {
+            suscribir('productos',snapshot => {
+                const datos = snapshot.val() || {};
+                productosList=Object.entries(datos).filter(([,v])=>v&&typeof v==='object')
+                    .map(([id,v])=>normalizarProducto(v,id));
+                actualizarVistas(); renderizarCarrito();
+            });
+            suscribir('empleados',snapshot => {
+                const datos=snapshot.val() || {};
+                empleadosList=Object.entries(datos).filter(([,v])=>v&&typeof v==='object')
+                    .map(([id,v])=>({id,...v}));
+                renderizarEmpleados();
+            });
+            suscribir('ventas',snapshot => {
+                const datos=snapshot.val() || {};
+                ventasList=Object.entries(datos).filter(([,v])=>v&&typeof v==='object')
+                    .map(([id,v])=>({id,...v}));
+                renderizarVentas();
+            });
+            suscribir('.info/connected',snapshot => {
+                conexionFirebase = snapshot.val()===true;
+                if (modoDatos==='firebase' && !errorFirebaseDetectado) estadoDeDatos(conexionFirebase?'Conectado a Firebase':'Firebase desconectado',
+                    conexionFirebase?'Catálogo en la nube. Los pedidos dependen de los permisos y la conexión a la base de datos.':
+                    'No se puede confirmar ninguna venta sin conexión. Revisa Internet y las reglas de Firebase.',!conexionFirebase);
+            });
+        }
+        function iniciarDatos() {
+            if (window.firebase?.database) volverAFirebase();
+            else activarModoLocal('No se cargó el SDK de Firebase (internet, bloqueo de scripts o archivo local).');
+        }
+        function activarModoLocal(motivo='Modo local activado manualmente.') {
+            desactivarEscuchas();
+            db=baseLocal(); modoDatos='local'; conexionFirebase=false; errorFirebaseDetectado='';
+            usuarioActual={nombre:'',rol:''}; carritoClienteList=[]; carritoActual=[];
+            $('loginModal').classList.remove('hidden');
+            estadoDeDatos('MODO DE PRUEBA LOCAL — SIN FIREBASE',
+                motivo+' Los datos son de demostración, no se sincronizan ni representan ventas reales. Empleado: clave demo1234.');
+            escucharBaseDeDatos(); actualizarVistas(); renderizarCarrito();
+        }
+        function volverAFirebase() {
+            if (!window.firebase?.database) return errorDeDatos('No está disponible el SDK de Firebase.');
+            try {
+                desactivarEscuchas();
+                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+                db=firebase.database(); modoDatos='firebase'; conexionFirebase=false; errorFirebaseDetectado='';
+                usuarioActual={nombre:'',rol:''}; carritoClienteList=[]; carritoActual=[];
+                $('loginModal').classList.remove('hidden');
+                estadoDeDatos('Conectando a Firebase...', 'Comprobando conexión y permisos de lectura y escritura.');
+                escucharBaseDeDatos(); actualizarVistas(); renderizarCarrito();
+            } catch (err) { errorDeDatos('No se pudo iniciar Firebase: '+err.message); }
+        }
+
+        function seleccionarRol(rol) {
+            if (!['cliente', 'empleado'].includes(rol)) return;
+            rolSeleccionadoModal = rol;
+            $('btnRoleCliente').classList.toggle('active', rol === 'cliente');
+            $('btnRoleEmpleado').classList.toggle('active', rol === 'empleado');
+            $('fieldsCliente').classList.toggle('hidden', rol !== 'cliente');
+            $('fieldsEmpleado').classList.toggle('hidden', rol !== 'empleado');
+        }
+
+        function iniciarSesion(evento) {
+            evento.preventDefault();
+            if (rolSeleccionadoModal === 'cliente') {
+                const nombre = $('clienteNombre').value.trim();
+                if (!nombre) return alert('Ingresa tu nombre.');
+                usuarioActual = { nombre, rol: 'cliente' };
+            } else {
+                const clave = $('empleadoClave').value;
+                const emp = empleadosList.find(e => e.clave === clave);
+                if (!emp) return alert('Clave de empleado incorrecta.');
+                usuarioActual = { nombre: String(emp.nombre), rol: 'empleado' };
+                $('empleadoClave').value = '';
+            }
+            $('loginModal').classList.add('hidden');
+            $('displayUsuarioNombre').textContent = `${usuarioActual.nombre} (${usuarioActual.rol.toUpperCase()})`;
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.style.display = usuarioActual.rol === 'empleado' ? 'inline-block' : 'none';
+            });
+            cambiarVista(usuarioActual.rol === 'empleado' ? 'inventario' : 'compras');
+        }
+
+        function cerrarSesion() {
+            usuarioActual = { nombre: '', rol: '' };
+            carritoActual = [];
+            carritoClienteList = [];
+            $('displayUsuarioNombre').textContent = 'Usuario';
+            $('loginModal').classList.remove('hidden');
+            $('clienteNombre').value = '';
+            $('empleadoClave').value = '';
+            actualizarVistas();
+            renderizarCarrito();
+        }
+
+        const vistas = {
+            compras: ['vistaCompras', 'tabCompras'],
+            inventario: ['vistaInventario', 'tabInventario'],
+            facturacion: ['vistaFacturacion', 'tabFacturacion'],
+            ventas: ['vistaVentas', 'tabVentas'],
+            empleados: ['vistaEmpleados', 'tabEmpleados']
+        };
+        function cambiarVista(vistaId) {
+            if (!vistas[vistaId]) return;
+            if (vistaId !== 'compras' && !soloEmpleado()) return;
+            document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            $(vistas[vistaId][0]).classList.add('active');
+            $(vistas[vistaId][1]).classList.add('active');
+            actualizarVistas();
+        }
+
+        function actualizarVistas() {
+            renderizarTienda();
+            renderizarInventario();
+            buscarFacturacion();
+            renderizarCarritoCliente();
+        }
+
+        async function guardarProducto(evento) {
+            evento.preventDefault();
+            if (!soloEmpleado()) return;
+            const id = $('prodId').value;
+            const nombre = $('prodNombre').value.trim();
+            const descripcion = $('prodDesc').value.trim();
+            const precioCentavos = aCentavos($('prodPrecio').value);
+            const stockRaw = Number($('prodStock').value);
+            if (!nombre || !descripcion || precioCentavos === null ||
+                !Number.isSafeInteger(stockRaw) || stockRaw < 0) {
+                return alert('Revisa el nombre, la descripción, el precio y el stock (entero no negativo).');
+            }
+            const datos = {
+                nombre, descripcion,
+                precio: precioCentavos / 100,
+                stock: stockRaw,
+                imagen: procesarUrlImagen($('prodImagen').value)
+            };
+            try {
+                if (id) {
+                    await db.ref('productos/' + id).update(datos);
+                } else {
+                    const nuevaRef = db.ref('productos').push();
+                    await nuevaRef.set({
+                        ...datos,
+                        // Clave Firebase -> código único, incluso con altas simultáneas.
+                        codigo: 'MED-' + nuevaRef.key.slice(-10).toUpperCase(),
+                        oferta: false, porcentajeOferta: 0
+                    });
+                }
+                limpiarFormInventario();
+            } catch (error) { mostrarError('No se pudo guardar el producto', error); }
+        }
+
+        function editarProducto(id) {
+            if (!soloEmpleado()) return;
+            const p = productosList.find(p => p.id === id);
+            if (!p) return;
+            $('prodId').value = p.id;
+            $('prodNombre').value = p.nombre;
+            $('prodPrecio').value = Number.isFinite(p.precio) ? p.precio : '';
+            $('prodStock').value = p.stock;
+            $('prodImagen').value = p.imagen === IMAGEN_DEFAULT ? '' : p.imagen;
+            $('prodDesc').value = p.descripcion;
+            $('formInvTitulo').textContent = 'Editar Producto: ' + p.nombre;
+            $('formInventario').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function limpiarFormInventario() {
+            $('prodId').value = '';
+            $('formInventario').reset();
+            $('formInvTitulo').textContent = 'Añadir Nuevo Medicamento/Producto';
+        }
+
+        async function eliminarProducto(id) {
+            if (!soloEmpleado() || !confirm('¿Eliminar este producto?')) return;
+            try { await db.ref('productos/' + id).remove(); }
+            catch (error) { mostrarError('No se pudo eliminar el producto', error); }
+        }
+
+        async function ponerEnOferta(id) {
+            if (!soloEmpleado()) return;
+            const entrada = prompt('Porcentaje de descuento entre 0 y 100:', '10');
+            if (entrada === null) return;
+            const porcentaje = Number(entrada.replace(',', '.'));
+            if (!Number.isFinite(porcentaje) || porcentaje <= 0 || porcentaje > 100)
+                return alert('El porcentaje debe ser mayor que 0 y hasta 100.');
+            try {
+                await db.ref('productos/' + id).update({ oferta: true, porcentajeOferta: porcentaje });
+            } catch (error) { mostrarError('No se pudo aplicar la oferta', error); }
+        }
+
+        async function quitarOferta(id) {
+            if (!soloEmpleado()) return;
+            try { await db.ref('productos/' + id).update({ oferta: false, porcentajeOferta: 0 }); }
+            catch (error) { mostrarError('No se pudo quitar la oferta', error); }
+        }
+
+        async function cambiarStock(id, signo) {
+            if (!soloEmpleado()) return;
+            const entrada = prompt(signo === 1 ? 'Unidades a añadir:' : 'Unidades a retirar:', '1');
+            if (entrada === null) return;
+            const cantidad = Number(entrada);
+            if (!Number.isSafeInteger(cantidad) || cantidad <= 0) return alert('Ingresa un entero positivo.');
+            try {
+                const resultado = await db.ref('productos/' + id + '/stock').transaction(actual => {
+                    const stock = Number(actual);
+                    if (!Number.isSafeInteger(stock) || stock < 0 ||
+                        (signo === -1 && stock < cantidad) ||
+                        !Number.isSafeInteger(stock + signo * cantidad)) return;
+                    return stock + signo * cantidad;
+                }, undefined, false);
+                if (!resultado.committed) alert('Operación rechazada: stock insuficiente o inválido.');
+            } catch (error) { mostrarError('No se pudo cambiar el stock', error); }
+        }
+        function transferirStock(id) { return cambiarStock(id, 1); }
+        function retirarStock(id) { return cambiarStock(id, -1); }
+
+        function renderizarInventario() {
+            const container = $('gridInventario');
+            if (!container) return;
+            const busqueda = $('searchInventario').value.trim().toLowerCase();
+            const orden = $('sortInventario').value;
+            const lista = productosList.filter(p =>
+                p.nombre.toLowerCase().includes(busqueda) || p.codigo.toLowerCase().includes(busqueda)
+            ).sort((a, b) => orden === 'cantidad'
+                ? b.stock - a.stock
+                : a.nombre.localeCompare(b.nombre, 'es'));
+
+            container.innerHTML = lista.length ? lista.map(p => {
+                const precio = precioProductoCentavos(p);
+                const alerta = p.stock < 5;
+                const id = escaparHTML(p.id);
+                return `<div class="product-card ${alerta ? 'stock-low' : ''}">
+                    ${p.oferta ? `<div class="offer-badge">OFERTA ${escaparHTML(p.porcentajeOferta)}% OFF</div>` : ''}
+                    <img class="product-img" src="${escaparHTML(p.imagen)}" alt="${escaparHTML(p.nombre)}" onerror="this.onerror=null;this.src='${IMAGEN_DEFAULT}'">
+                    <div class="product-body">
+                        <span class="product-code">CÓDIGO: ${escaparHTML(p.codigo)}</span>
+                        <h4 class="product-title">${escaparHTML(p.nombre)}</h4>
+                        <p class="product-desc">${escaparHTML(p.descripcion)}</p>
+                        <div>${p.oferta && aCentavos(p.precio) !== null ? `<del>$${formatoMoneda(aCentavos(p.precio))}</del> ` : ''}
+                        <span class="product-price">${precio === null ? 'Precio inválido' : '$' + formatoMoneda(precio)}</span></div>
+                        <p class="product-stock" style="color:${alerta ? 'var(--alerta-roja)' : 'inherit'}">Disponible: ${p.stock} unidades ${alerta ? '(¡ALERTA STOCK!)' : ''}</p>
+                        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:10px">
+                            <button class="btn btn-primary" data-action="sum-stock" data-id="${id}">+ Stock</button>
+                            <button class="btn btn-warning" data-action="sub-stock" data-id="${id}">− Stock</button>
+                            <button class="btn btn-primary" data-action="edit" data-id="${id}">Editar</button>
+                            <button class="btn ${p.oferta ? 'btn-danger' : 'btn-success'}" data-action="${p.oferta ? 'remove-offer' : 'offer'}" data-id="${id}">${p.oferta ? 'Quitar oferta' : 'Ofertar'}</button>
+                            <button class="btn btn-danger" data-action="delete" data-id="${id}">Borrar</button>
+                        </div>
+                    </div></div>`;
+            }).join('') : '<p>No hay productos registrados en el inventario.</p>';
+        }
+
+        function renderizarTienda() {
+            const container = $('gridTienda');
+            if (!container) return;
+            const busqueda = $('searchCompras').value.trim().toLowerCase();
+            const lista = productosList.filter(p => p.nombre.toLowerCase().includes(busqueda) ||
+                p.descripcion.toLowerCase().includes(busqueda) || p.codigo.toLowerCase().includes(busqueda));
+            container.innerHTML = lista.length ? lista.map(p => {
+                const precio = precioProductoCentavos(p);
+                const id = escaparHTML(p.id);
+                return `<div class="product-card ${p.stock < 5 ? 'stock-low' : ''}">
+                    ${p.oferta ? '<div class="offer-badge">OFERTA ESPECIAL</div>' : ''}
+                    <img class="product-img" src="${escaparHTML(p.imagen)}" alt="${escaparHTML(p.nombre)}" onerror="this.onerror=null;this.src='${IMAGEN_DEFAULT}'">
+                    <div class="product-body">
+                        <span class="product-code">CÓDIGO: ${escaparHTML(p.codigo)}</span>
+                        <h4 class="product-title">${escaparHTML(p.nombre)}</h4>
+                        <p class="product-desc">${escaparHTML(p.descripcion)}</p>
+                        <div>${p.oferta && aCentavos(p.precio) !== null ? `<del>$${formatoMoneda(aCentavos(p.precio))}</del> ` : ''}
+                        <span class="product-price">${precio === null ? 'Precio inválido' : '$' + formatoMoneda(precio)}</span></div>
+                        <p class="product-stock">${p.stock ? `Disponible: ${p.stock} un.` : 'AGOTADO'}</p>
+                        ${p.stock > 0 && precio !== null ? `<button class="btn btn-success" data-action="add-shop" data-id="${id}">Añadir al carrito</button>` : ''}
+                    </div></div>`;
+            }).join('') : '<p>No hay productos disponibles en el catálogo.</p>';
+        }
+
+        function buscarFacturacion() {
+            const tbody = $('tablaFacturacionResultados');
+            if (!tbody) return;
+            const termino = $('factBuscar').value.trim().toLowerCase();
+            if (!termino) { tbody.innerHTML = ''; return; }
+            const lista = productosList.filter(p => p.nombre.toLowerCase().includes(termino) ||
+                p.codigo.toLowerCase().includes(termino));
+            tbody.innerHTML = lista.map(p => {
+                const precio = precioProductoCentavos(p);
+                return `<tr><td>${escaparHTML(p.codigo)}</td><td>${escaparHTML(p.nombre)}${p.oferta ? ' (Oferta)' : ''}</td>
+                    <td>${p.stock}</td><td>${precio === null ? 'Inválido' : '$' + formatoMoneda(precio)}</td>
+                    <td>${p.stock ? 'Disponible' : 'Agotado'}</td>
+                    <td>${p.stock > 0 && precio !== null ? `<button class="btn btn-success" data-action="add-invoice" data-id="${escaparHTML(p.id)}">Agregar</button>` : ''}</td></tr>`;
+            }).join('');
+        }
+
+        function calcularCarrito(carrito) {
+            let totalCentavos = 0;
+            const lineas = carrito.map(item => {
+                const producto = productosList.find(p => p.id === item.id);
+                if (!producto || !Number.isSafeInteger(item.cantidad) || item.cantidad < 1) return null;
+                const precioCentavos = precioProductoCentavos(producto);
+                if (precioCentavos === null) return null;
+                const subtotalCentavos = precioCentavos * item.cantidad;
+                if (!Number.isSafeInteger(subtotalCentavos)) return null;
+                totalCentavos += subtotalCentavos;
+                return { ...item, producto, precioCentavos, subtotalCentavos };
+            });
+            return { lineas, totalCentavos };
+        }
+
+        function agregarProductoCarrito(carrito, id) {
+            if (!usuarioActual.rol) return alert('Inicia sesión antes de añadir productos.');
+            const producto = productosList.find(p => p.id === id);
+            if (!producto || producto.stock === 0 || precioProductoCentavos(producto) === null)
+                return alert('Este producto no está disponible.');
+            const item = carrito.find(item => item.id === id);
+            if (item) {
+                if (item.cantidad >= producto.stock) return alert('No hay más existencias.');
+                item.cantidad++;
+            } else {
+                carrito.push({ id, cantidad: 1 });
+            }
+        }
+        function agregarAlCarritoCliente(id) {
+            agregarProductoCarrito(carritoClienteList, id);
+            renderizarCarritoCliente();
+        }
+        function agregarAlCarrito(id) {
+            if (!soloEmpleado()) return;
+            agregarProductoCarrito(carritoActual, id);
+            renderizarCarrito();
+        }
+
+        function dibujarCarrito(carrito, idTabla, idTotal, tipo) {
+            const { lineas, totalCentavos } = calcularCarrito(carrito);
+            $(idTabla).innerHTML = lineas.map((item, indice) => {
+                if (!item) return '<tr><td colspan="5">Producto eliminado o precio inválido. Retíralo del carrito.</td></tr>';
+                const excede = item.cantidad > item.producto.stock;
+                return `<tr><td>${escaparHTML(item.producto.nombre)}</td>
+                    <td>${item.cantidad}${excede ? ' (stock insuficiente)' : ''}</td>
+                    <td>$${formatoMoneda(item.precioCentavos)}</td>
+                    <td>$${formatoMoneda(item.subtotalCentavos)}</td>
+                    <td><button class="btn btn-danger" data-action="remove-${tipo}" data-index="${indice}">Quitar</button></td></tr>`;
+            }).join('');
+            $(idTotal).textContent = Number.isSafeInteger(totalCentavos) ? formatoMoneda(totalCentavos) : 'Error';
+        }
+        function renderizarCarritoCliente() { dibujarCarrito(carritoClienteList, 'tablaCarritoCliente', 'totalCarritoCliente', 'shop'); }
+        function renderizarCarrito() { dibujarCarrito(carritoActual, 'tablaCarrito', 'totalFactura', 'invoice'); }
+        function removerDelCarritoCliente(indice) {
+            if (Number.isInteger(indice) && indice >= 0) carritoClienteList.splice(indice, 1);
+            renderizarCarritoCliente();
+        }
+        function removerDelCarrito(indice) {
+            if (Number.isInteger(indice) && indice >= 0) carritoActual.splice(indice, 1);
+            renderizarCarrito();
+        }
+
+        async function restaurarReservas(reservas) {
+            const errores = [];
+            for (const item of reservas.slice().reverse()) {
+                try {
+                    const resultado = await db.ref('productos/' + item.id + '/stock').transaction(actual => {
+                        const stock = Number(actual);
+                        if (!Number.isSafeInteger(stock) || stock < 0 || !Number.isSafeInteger(stock + item.cantidad)) return;
+                        return stock + item.cantidad;
+                    }, undefined, false);
+                    if (!resultado.committed) errores.push(item.id);
+                } catch (error) {
+                    console.error('No se pudo restaurar stock:', item.id, error);
+                    errores.push(item.id);
+                }
+            }
+            return errores;
+        }
+
+        // Las reservas individuales de Firebase evitan stock negativo por concurrencia.
+        // La operación entre múltiples productos + ventas NO es una transacción atómica
+        // integral. Para producción debe implementarse del lado del servidor.
+        async function registrarVenta(carrito, comprador, vendedor) {
+            if (ventaEnProceso) return null;
+            if (modoDatos!=='local' && (!conexionFirebase || errorFirebaseDetectado)) {
+                alert('Firebase no está disponible o rechazó operaciones (conexión/permisos). Consulta el mensaje de la barra superior. No es posible completar la venta real.');
+                return null;
+            }
+            if (!carrito.length) { alert('El carrito está vacío.'); return null; }
+            if (!usuarioActual.rol) { alert('Debes iniciar sesión.'); return null; }
+            const { lineas, totalCentavos } = calcularCarrito(carrito);
+            if (lineas.some(item => !item) || !Number.isSafeInteger(totalCentavos)) {
+                alert('Hay productos no válidos en el carrito. Retíralos y vuelve a intentar.');
+                return null;
+            }
+            if (lineas.some(item => item.cantidad > item.producto.stock)) {
+                alert('Las existencias cambiaron. Revisa las cantidades del carrito.');
+                return null;
+            }
+            ventaEnProceso = true;
+            $('btnPagarCarritoCliente').disabled = true;
+            $('btnProcesarFactura').disabled = true;
+            const reservas = [];
+            try {
+                for (const item of lineas) {
+                    const resultado = await db.ref('productos/' + item.id).transaction(raw => {
+                        if (!raw || typeof raw !== 'object') return;
+                        const actual = normalizarProducto(raw, item.id);
+                        if (actual.stock < item.cantidad || precioProductoCentavos(actual) !== item.precioCentavos) return;
+                        return { ...raw, stock: actual.stock - item.cantidad };
+                    }, undefined, false);
+                    if (!resultado.committed) throw new Error('Stock insuficiente, precio modificado o producto no disponible: ' + item.producto.nombre);
+                    const actualizado = normalizarProducto(resultado.snapshot.val(), item.id);
+                    const precioCentavos = precioProductoCentavos(actualizado);
+                    reservas.push({ id: item.id, cantidad: item.cantidad, codigo: actualizado.codigo,
+                        nombre: actualizado.nombre, precioCentavos,
+                        subtotalCentavos: precioCentavos * item.cantidad });
+                }
+
+                const fecha = new Date();
+                const codigoFactura = 'FAC-' + db.ref('ventas').push().key;
+                const actualizaciones = {};
+                reservas.forEach(item => {
+                    const nuevaLlave = db.ref('ventas').push().key;
+                    actualizaciones['ventas/' + nuevaLlave] = {
+                        fechaHora: fecha.toLocaleString('es-DO'), fechaISO: fecha.toISOString(),
+                        codigoFactura, codigoProducto: item.codigo,
+                        nombreProducto: item.nombre, comprador, vendedor,
+                        cantidad: item.cantidad, precioUnitario: item.precioCentavos / 100,
+                        total: item.subtotalCentavos / 100
+                    };
+                });
+                await db.ref().update(actualizaciones); // Registra todas las líneas juntas.
+                const comprobante={ codigoFactura, fechaHora:fecha.toLocaleString('es-DO'),
+                    comprador, vendedor, lineas:reservas.map(i=>({
+                        codigo:i.codigo, nombre:i.nombre, cantidad:i.cantidad,
+                        precioCentavos:i.precioCentavos, subtotalCentavos:i.subtotalCentavos
+                    })), totalCentavos:reservas.reduce((s,i)=>s+i.subtotalCentavos,0),
+                    demostracion:modoDatos==='local' };
+                return comprobante;
+            } catch (error) {
+                const erroresRollback = await restaurarReservas(reservas);
+                mostrarError('No se pudo completar la venta' + (erroresRollback.length ?
+                    '. ATENCIÓN: revisar manualmente el stock de ' + erroresRollback.join(', ') : ''), error);
+                return null;
+            } finally {
+                ventaEnProceso = false;
+                $('btnPagarCarritoCliente').disabled = false;
+                $('btnProcesarFactura').disabled = false;
+            }
+        }
+
+        async function pagarCarritoCliente() {
+            const factura = await registrarVenta(carritoClienteList,
+                usuarioActual.nombre || 'Cliente en línea',
+                usuarioActual.rol === 'empleado' ? usuarioActual.nombre : 'Venta Web Directa');
+            if (!factura) return;
+            carritoClienteList = [];
+            renderizarCarritoCliente();
+            mostrarFactura(factura);
+        }
+
+        async function procesarFactura() {
+            if (!soloEmpleado()) return;
+            const cliente = $('factCliente').value.trim() || 'Cliente Mostrador';
+            const factura = await registrarVenta(carritoActual, cliente, usuarioActual.nombre);
+            if (!factura) return;
+            carritoActual = [];
+            $('factCliente').value = '';
+            $('factBuscar').value = '';
+            renderizarCarrito();
+            buscarFacturacion();
+            mostrarFactura(factura);
+        }
+
+        function renderizarVentas() {
+            const tbody = $('tablaHistoricoVentas');
+            if (!tbody) return;
+            tbody.innerHTML = ventasList.slice().sort((a, b) =>
+                (b.fechaISO || b.id || '').localeCompare(a.fechaISO || a.id || '')
+            ).map(v => {
+                const valor = aCentavos(v.total);
+                return `<tr>
+                    <td>${escaparHTML(v.fechaHora)}</td>
+                    <td>${escaparHTML(v.codigoFactura || 'N/A')}</td>
+                    <td>${escaparHTML(v.nombreProducto)} (${escaparHTML(v.codigoProducto)})</td>
+                    <td>${escaparHTML(v.comprador)}</td><td>${escaparHTML(v.vendedor)}</td>
+                    <td>${enteroNoNegativo(v.cantidad)}</td>
+                    <td><strong>${valor === null ? 'Inválido' : '$' + formatoMoneda(valor)}</strong></td>
+                    <td><button type="button" class="btn btn-primary" data-action="view-invoice" data-id="${escaparHTML(v.codigoFactura || '')}">Ver factura</button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function guardarEmpleado(evento) {
+            evento.preventDefault();
+            if (!soloEmpleado()) return;
+            const nombre = $('empNombre').value.trim();
+            const clave = $('empClave').value;
+            const cargo = $('empCargo').value.trim();
+            if (!nombre || !cargo || clave.length < 4) return alert('Nombre, cargo y una clave de al menos 4 caracteres son obligatorios.');
+            if (empleadosList.some(e => e.clave === clave)) return alert('Esa clave ya está asignada a otro empleado.');
+            try {
+                await db.ref('empleados').push({ nombre, clave, cargo });
+                $('formEmpleado').reset();
+                alert('Empleado guardado correctamente.');
+            } catch (error) { mostrarError('No se pudo guardar el empleado', error); }
+        }
+
+        function renderizarEmpleados() {
+            const tbody = $('tablaEmpleados');
+            if (!tbody) return;
+            tbody.innerHTML = empleadosList.map(e => `<tr>
+                <td>${escaparHTML(e.nombre)}</td><td>${escaparHTML(e.cargo)}</td><td>****</td>
+                <td><button class="btn btn-danger" data-action="delete-employee" data-id="${escaparHTML(e.id)}">Borrar</button></td>
+            </tr>`).join('');
+        }
+
+        async function eliminarEmpleado(id) {
+            if (!soloEmpleado() || !confirm('¿Eliminar este empleado?')) return;
+            if (empleadosList.length <= 1) return alert('No puedes eliminar al último empleado.');
+            try { await db.ref('empleados/' + id).remove(); }
+            catch (error) { mostrarError('No se pudo eliminar el empleado', error); }
+        }
+
+        function mostrarFactura(factura) {
+            if (!factura || !Array.isArray(factura.lineas)) return;
+            ultimoComprobante=factura;
+            const filas=factura.lineas.map(linea=>`<tr>
+                <td>${escaparHTML(linea.codigo)}</td><td>${escaparHTML(linea.nombre)}</td>
+                <td>${linea.cantidad}</td><td>$${formatoMoneda(linea.precioCentavos)}</td>
+                <td>$${formatoMoneda(linea.subtotalCentavos)}</td></tr>`).join('');
+            $('contenidoFactura').innerHTML=`
+                <div class="invoice-head"><div><h2>Farmacorporan</h2>
+                    <p>Comprobante de ${factura.demostracion ? 'PRUEBA LOCAL' : 'pedido / venta'}</p></div>
+                    <div style="text-align:right"><strong>${escaparHTML(factura.codigoFactura)}</strong><p>${escaparHTML(factura.fechaHora)}</p></div></div>
+                <p><strong>Cliente:</strong> ${escaparHTML(factura.comprador)}</p>
+                <p><strong>Atendido por:</strong> ${escaparHTML(factura.vendedor)}</p>
+                <div class="table-responsive"><table><thead><tr><th>Código</th><th>Producto</th>
+                    <th>Cantidad</th><th>Precio un.</th><th>Subtotal</th></tr></thead><tbody>${filas}</tbody></table></div>
+                <div class="invoice-total">TOTAL: $${formatoMoneda(factura.totalCentavos)}</div>
+                <p class="invoice-nota">${factura.demostracion
+                    ? 'DEMOSTRACIÓN LOCAL. Este comprobante no es una venta real ni está sincronizado con Firebase.'
+                    : 'Comprobante interno de pedido/venta. No constituye comprobante fiscal (NCF/e-CF) y no acredita pago electrónico.'}
+                    Esta aplicación no procesa cobros con tarjeta ni pagos en línea.</p>`;
+            $('facturaModal').classList.remove('hidden');
+        }
+        function verFacturaHistorial(codigo) {
+            if (!codigo) return alert('Esta venta no tiene código de factura.');
+            const ventas=ventasList.filter(v=>v.codigoFactura===codigo);
+            if (!ventas.length) return alert('No se encontró la factura en el historial.');
+            const lineas=ventas.map(v=>{
+                const cantidad=enteroNoNegativo(v.cantidad);
+                const subtotalCentavos=aCentavos(v.total) ?? 0;
+                const precioCentavos=aCentavos(v.precioUnitario) ?? (cantidad?Math.round(subtotalCentavos/cantidad):0);
+                return {codigo:v.codigoProducto||'', nombre:v.nombreProducto||'', cantidad,
+                    precioCentavos,subtotalCentavos};
+            });
+            mostrarFactura({codigoFactura:codigo,fechaHora:ventas[0].fechaHora||'',
+                comprador:ventas[0].comprador||'',vendedor:ventas[0].vendedor||'',lineas,
+                totalCentavos:lineas.reduce((s,l)=>s+l.subtotalCentavos,0),demostracion:modoDatos==='local'});
+        }
+        function cerrarFactura() { $('facturaModal').classList.add('hidden'); }
+        function imprimirFactura() {
+            if (!ultimoComprobante) return;
+            window.print();
+        }
+
+        function conectarEventosDeTablas() {
+            const acciones = {
+                'add-shop': agregarAlCarritoCliente,
+                'add-invoice': agregarAlCarrito,
+                'sum-stock': transferirStock,
+                'sub-stock': retirarStock,
+                'edit': editarProducto,
+                'delete': eliminarProducto,
+                'offer': ponerEnOferta,
+                'remove-offer': quitarOferta,
+                'delete-employee': eliminarEmpleado,
+                'remove-shop': value => removerDelCarritoCliente(Number(value)),
+                'remove-invoice': value => removerDelCarrito(Number(value)),
+                'view-invoice': verFacturaHistorial
+            };
+            document.querySelectorAll('#gridTienda, #gridInventario, #tablaFacturacionResultados, #tablaCarritoCliente, #tablaCarrito, #tablaEmpleados, #tablaHistoricoVentas')
+                .forEach(contenedor => contenedor.addEventListener('click', evento => {
+                    const boton = evento.target.closest('button[data-action]');
+                    if (!boton || !contenedor.contains(boton)) return;
+                    const accion = acciones[boton.dataset.action];
+                    if (accion) accion(boton.dataset.id ?? boton.dataset.index);
+                }));
+        }
+
+        conectarEventosDeTablas();
+        iniciarDatos();
+    </script>
+</body>
+</html>
