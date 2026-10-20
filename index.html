@@ -247,7 +247,6 @@
             transform: translateY(-3px);
         }
 
-        /* Alerta roja cuando hay menos de 5 unidades o sin stock */
         .product-card.stock-low {
             border-color: var(--alerta-roja) !important;
             background-color: #fef2f2;
@@ -296,7 +295,6 @@
             font-weight: 600;
         }
 
-        /* ETIQUETA DE OFERTA */
         .offer-badge {
             position: absolute;
             top: 10px;
@@ -340,7 +338,6 @@
             color: white;
         }
 
-        /* MODAL Y PANTALLA DE LOGIN */
         .login-overlay {
             position: fixed;
             top: 0;
@@ -711,9 +708,28 @@
         let carritoActual = [];
         let carritoClienteList = [];
 
+        // Imagen genérica cuando un enlace no sea válido
+        const IMAGEN_DEFAULT = "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300";
+
         window.onload = function() {
             escucharBaseDeDatos();
         };
+
+        // Función para extraer la URL limpia de Google Imágenes
+        function procesarUrlImagen(url) {
+            if (!url) return IMAGEN_DEFAULT;
+            if (url.includes("google.com/url?") && url.includes("url=")) {
+                try {
+                    const match = url.match(/url=([^&]+)/);
+                    if (match && match[1]) {
+                        return decodeURIComponent(match[1]);
+                    }
+                } catch (e) {
+                    return IMAGEN_DEFAULT;
+                }
+            }
+            return url;
+        }
 
         function escucharBaseDeDatos() {
             db.ref('productos').on('value', (snapshot) => {
@@ -723,8 +739,6 @@
                     Object.keys(data).forEach(key => {
                         productosList.push({ id: key, ...data[key] });
                     });
-                } else {
-                    inicializarProductosPorDefecto();
                 }
                 actualizarVistas();
             });
@@ -752,15 +766,6 @@
                 }
                 renderizarVentas();
             });
-        }
-
-        function inicializarProductosPorDefecto() {
-            const iniciales = [
-                { codigo: "100001", nombre: "Paracetamol 500mg", precio: 5.50, stock: 12, descripcion: "Alivio del dolor y la fiebre.", imagen: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300", oferta: false, porcentajeOferta: 0 },
-                { codigo: "100002", nombre: "Ibuprofeno 400mg", precio: 8.00, stock: 3, descripcion: "Antiinflamatorio y analgésico.", imagen: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300", oferta: true, porcentajeOferta: 15 },
-                { codigo: "100003", nombre: "Amoxicilina 500mg", precio: 12.50, stock: 0, descripcion: "Antibiótico de amplio espectro.", imagen: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300", oferta: false, porcentajeOferta: 0 }
-            ];
-            iniciales.forEach(p => db.ref('productos').push(p));
         }
 
         function inicializarEmpleadosPorDefecto() {
@@ -844,7 +849,8 @@
             const nombre = document.getElementById('prodNombre').value;
             const precio = parseFloat(document.getElementById('prodPrecio').value);
             const stock = parseInt(document.getElementById('prodStock').value);
-            const imagen = document.getElementById('prodImagen').value || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300';
+            let imagenInput = document.getElementById('prodImagen').value;
+            const imagen = procesarUrlImagen(imagenInput);
             const descripcion = document.getElementById('prodDesc').value;
 
             if (id) {
@@ -936,6 +942,11 @@
                 lista.sort((a,b) => b.stock - a.stock);
             }
 
+            if (lista.length === 0) {
+                container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 2rem;">No hay productos registrados en el inventario.</p>`;
+                return;
+            }
+
             lista.forEach(p => {
                 const precioFinal = p.oferta ? p.precio * (1 - p.porcentajeOferta/100) : p.precio;
                 const esAlertaStock = p.stock < 5;
@@ -943,7 +954,7 @@
                 container.innerHTML += `
                     <div class="product-card ${esAlertaStock ? 'stock-low' : ''}">
                         ${p.oferta ? `<div class="offer-badge">OFERTA \${p.porcentajeOferta}% OFF</div>` : ''}
-                        <img src="${p.imagen}" class="product-img" alt="${p.nombre}">
+                        <img src="${p.imagen}" class="product-img" alt="${p.nombre}" onerror="this.src='${IMAGEN_DEFAULT}'">
                         <div class="product-body">
                             <span class="product-code">CÓDIGO: ${p.codigo}</span>
                             <h4 class="product-title">${p.nombre}</h4>
@@ -978,6 +989,11 @@
             const busqueda = document.getElementById('searchCompras').value.toLowerCase();
             const lista = productosList.filter(p => p.nombre.toLowerCase().includes(busqueda) || p.descripcion.toLowerCase().includes(busqueda));
 
+            if (lista.length === 0) {
+                container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 2rem;">No hay productos disponibles en el catálogo.</p>`;
+                return;
+            }
+
             lista.forEach(p => {
                 const precioFinal = p.oferta ? p.precio * (1 - p.porcentajeOferta/100) : p.precio;
                 const esAlertaStock = p.stock < 5;
@@ -985,7 +1001,7 @@
                 container.innerHTML += `
                     <div class="product-card ${esAlertaStock ? 'stock-low' : ''}">
                         ${p.oferta ? `<div class="offer-badge">OFERTA ESPECIAL</div>` : ''}
-                        <img src="${p.imagen}" class="product-img" alt="${p.nombre}">
+                        <img src="${p.imagen}" class="product-img" alt="${p.nombre}" onerror="this.src='${IMAGEN_DEFAULT}'">
                         <div class="product-body">
                             <span class="product-code">CÓDIGO: ${p.codigo}</span>
                             <h4 class="product-title">${p.nombre}</h4>
@@ -995,7 +1011,7 @@
                                 <span class="product-price">$${precioFinal.toFixed(2)}</span>
                             </div>
                             <p class="product-stock" style="color: ${p.stock === 0 ? 'red' : 'inherit'};">
-                                ${p.stock > 0 ? `Disponible: \${p.stock} un.` : 'AGOTADO'}
+                                ${p.stock > 0 ? 'Disponible: ' + p.stock + ' un.' : 'AGOTADO'}
                             </p>
                             ${p.stock > 0 ? `<button class="btn btn-success" style="margin-top:0.5rem;" onclick="agregarAlCarritoCliente('\${p.id}')">Añadir al Carrito</button>` : ''}
                         </div>
