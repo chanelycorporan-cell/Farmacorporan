@@ -708,14 +708,12 @@
         let carritoActual = [];
         let carritoClienteList = [];
 
-        // Imagen genérica cuando un enlace no sea válido
         const IMAGEN_DEFAULT = "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300";
 
         window.onload = function() {
             escucharBaseDeDatos();
         };
 
-        // Función para extraer la URL limpia de Google Imágenes
         function procesarUrlImagen(url) {
             if (!url) return IMAGEN_DEFAULT;
             if (url.includes("google.com/url?") && url.includes("url=")) {
@@ -841,6 +839,7 @@
             renderizarTienda();
             renderizarInventario();
             buscarFacturacion();
+            renderizarCarritoCliente();
         }
 
         function guardarProducto(e) {
@@ -1043,6 +1042,7 @@
             }
 
             renderizarCarritoCliente();
+            alert(`"${prod.nombre}" fue añadido al carrito.`);
         }
 
         function renderizarCarritoCliente() {
@@ -1064,7 +1064,10 @@
                 `;
             });
 
-            document.getElementById('totalCarritoCliente').innerText = total.toFixed(2);
+            const totalEl = document.getElementById('totalCarritoCliente');
+            if (totalEl) {
+                totalEl.innerText = total.toFixed(2);
+            }
         }
 
         function removerDelCarritoCliente(index) {
@@ -1090,7 +1093,7 @@
                         codigoProducto: item.codigo,
                         nombreProducto: item.nombre,
                         comprador: usuarioActual.nombre || "Cliente en línea",
-                        vendedor: "Venta Web Directa",
+                        vendedor: usuarioActual.rol === 'empleado' ? usuarioActual.nombre : "Venta Web Directa",
                         cantidad: item.cantidad,
                         total: item.subtotal
                     });
@@ -1174,7 +1177,10 @@
                 `;
             });
 
-            document.getElementById('totalFactura').innerText = total.toFixed(2);
+            const totalEl = document.getElementById('totalFactura');
+            if (totalEl) {
+                totalEl.innerText = total.toFixed(2);
+            }
         }
 
         function removerDelCarrito(index) {
